@@ -5,7 +5,7 @@ export -f log
 
 copy_previous(){
 	log "Copying root filesystem from previous stage"
-	if [ ! -d "${PREV_ROOTFS_DIR}" ]; then
+	if [[ ! -d $PREV_ROOTFS_DIR ]]; then
 		log "Previous stage rootfs not found"
 		false
 	fi
@@ -15,7 +15,7 @@ copy_previous(){
 export -f copy_previous
 
 unmount(){
-	if [ -z "$1" ]; then
+	if [[ -z $1 ]]; then
 		DIR=$PWD
 	else
 		DIR=$1
@@ -37,10 +37,10 @@ unmount_image(){
 	local LOOP_DEVICES
 	LOOP_DEVICES=$(losetup --list | grep "$(basename "${1}")" | cut -f1 -d' ')
 	for LOOP_DEV in ${LOOP_DEVICES}; do
-		if [ -n "${LOOP_DEV}" ]; then
+		if [[ -n $LOOP_DEV ]]; then
 			local MOUNTED_DIR
 			MOUNTED_DIR=$(mount | grep "$(basename "${LOOP_DEV}")" | head -n 1 | cut -f 3 -d ' ')
-			if [ -n "${MOUNTED_DIR}" ] && [ "${MOUNTED_DIR}" != "/" ]; then
+			if [[ -n $MOUNTED_DIR && $MOUNTED_DIR != "/" ]]; then
 				unmount "$(dirname "${MOUNTED_DIR}")"
 			fi
 			sleep 1

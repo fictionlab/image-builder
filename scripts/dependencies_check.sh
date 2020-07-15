@@ -9,8 +9,8 @@ dependencies_check()
 	local depfile deps missing
 
 	for depfile in "$@"; do
-		if [[ -e "$depfile" ]]; then
-			deps="$(sed -f "${SCRIPT_DIR}/remove-comments.sed" < "${BASE_DIR}/depends")"
+		if [[ -e $depfile ]]; then
+			deps="$(sed -f "${SCRIPT_DIR}/remove-comments.sed" < $depfile)"
 
 		fi
 		for dep in $deps; do

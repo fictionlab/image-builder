@@ -4,7 +4,7 @@ run_sub_stage()
 	pushd "${SUB_STAGE_DIR}" > /dev/null
 
 	for i in {00..99}; do
-		if [ -f "${i}-debconf" ]; then
+		if [[ -f ${i}-debconf ]]; then
 			log "Begin ${SUB_STAGE_DIR}/${i}-debconf"
 			on_chroot << EOF
 debconf-set-selections <<SELEOF
@@ -14,7 +14,7 @@ EOF
 			log "End ${SUB_STAGE_DIR}/${i}-debconf"
 		fi
 
-		if [ -f "${i}-packages-nr" ]; then
+		if [[ -f ${i}-packages-nr ]]; then
 			log "Begin ${SUB_STAGE_DIR}/${i}-packages-nr"
 			PACKAGES="$(sed -f "${SCRIPT_DIR}/remove-comments.sed" < "${i}-packages-nr")"
 			if [ -n "$PACKAGES" ]; then
@@ -25,10 +25,10 @@ EOF
 			log "End ${SUB_STAGE_DIR}/${i}-packages-nr"
 		fi
 
-		if [ -f "${i}-packages" ]; then
+		if [[ -f ${i}-packages ]]; then
 			log "Begin ${SUB_STAGE_DIR}/${i}-packages"
 			PACKAGES="$(sed -f "${SCRIPT_DIR}/remove-comments.sed" < "${i}-packages")"
-			if [ -n "$PACKAGES" ]; then
+			if [[ -n $PACKAGES ]]; then
 				on_chroot << EOF
 apt-get -o APT::Acquire::Retries=3 install -y $PACKAGES
 EOF
@@ -36,7 +36,7 @@ EOF
 			log "End ${SUB_STAGE_DIR}/${i}-packages"
 		fi
 
-		if [ -d "${i}-patches" ]; then
+		if [[ -d ${i}-patches ]]; then
 			log "Begin ${SUB_STAGE_DIR}/${i}-patches"
 			pushd "${STAGE_WORK_DIR}" > /dev/null
 
@@ -45,7 +45,7 @@ EOF
 			mkdir -p "$SUB_STAGE_QUILT_PATCH_DIR"
 			ln -snf "$SUB_STAGE_QUILT_PATCH_DIR" .pc
 			quilt upgrade
-			if [ -e "${SUB_STAGE_DIR}/${i}-patches/EDIT" ]; then
+			if [[ -e ${SUB_STAGE_DIR}/${i}-patches/EDIT ]]; then
 				echo "Dropping into bash to edit patches..."
 				bash
 			fi
@@ -63,13 +63,13 @@ EOF
 			log "End ${SUB_STAGE_DIR}/${i}-patches"
 		fi
 
-		if [ -x ${i}-run.sh ]; then
+		if [[ -x ${i}-run.sh ]]; then
 			log "Begin ${SUB_STAGE_DIR}/${i}-run.sh"
 			./${i}-run.sh
 			log "End ${SUB_STAGE_DIR}/${i}-run.sh"
 		fi
 
-		if [ -f ${i}-run-chroot.sh ]; then
+		if [[ -f ${i}-run-chroot.sh ]]; then
 			log "Begin ${SUB_STAGE_DIR}/${i}-run-chroot.sh"
 			on_chroot < ${i}-run-chroot.sh
 			log "End ${SUB_STAGE_DIR}/${i}-run-chroot.sh"
@@ -90,30 +90,28 @@ run_stage(){
 
 	unmount "${STAGE_WORK_DIR}"
 
-	if [ ! -f SKIP_IMAGES ]; then
-		if [ -f "${STAGE_DIR}/EXPORT_IMAGE" ]; then
-			EXPORT_STAGES="${EXPORT_STAGES} ${STAGE}"
+	if [[ ! -f SKIP_IMAGES ]]; then
+		if [[ -f "${STAGE_DIR}/EXPORT_IMAGE" ]]; then
+			EXPORT_STAGES+=( $STAGE )
 		fi
 	fi
 
-	if [ ${STAGE} = "export-image" ] ||
-		 [ ${STAGE_NR} -ge ${STAGE_FIRST} ] && [ ! -f SKIP ]; then
+	if [[ $STAGE = "export-image" ||
+	    $STAGE_NR -ge $STAGE_FIRST && ! -f SKIP ]]; then
 
-		if [ "${CLEAN}" = "1" ]; then
-			if [ -d "${STAGE_WORK_DIR}" ]; then
-				rm -rf "${STAGE_WORK_DIR}"
-			fi
+		if [[ $CLEAN = 1 && -d $STAGE_WORK_DIR ]]; then
+			rm -rf "${STAGE_WORK_DIR}"
 		fi
 		mkdir -p "${STAGE_WORK_DIR}"
 		
-		if [ -x prerun.sh ]; then
+		if [[ -x prerun.sh ]]; then
 			log "Begin ${STAGE_DIR}/prerun.sh"
 			./prerun.sh
 			log "End ${STAGE_DIR}/prerun.sh"
 		fi
 		for SUB_STAGE_DIR in "${STAGE_DIR}"/*; do
-			if [ -d "${SUB_STAGE_DIR}" ]; then
-				if [ ! -f "${SUB_STAGE_DIR}/SKIP" ]; then
+			if [[ -d $SUB_STAGE_DIR ]]; then
+				if [[ ! -f ${SUB_STAGE_DIR}/SKIP ]]; then
 					run_sub_stage
 				else
 					log "Skipping ${STAGE}/$(basename ${SUB_STAGE_DIR})"
