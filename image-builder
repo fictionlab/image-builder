@@ -71,11 +71,11 @@ dependencies_check "${BASE_DIR}/depends"
 export IMG_DATE="$(date +%Y-%m-%d)"
 export IMG_TIME="$(date +%H-%M-%S)"
 
-if [ "${CONTINUE}" = "1" ]; then
-	PREV_WORK=$(ls -1 ${BASE_DIR}/work 2>/dev/null | tail -n 1)
+if [[ $CONTINUE = 1 ]]; then
+	PREV_WORK="$(ls -1 ${BASE_DIR}/work 2>/dev/null | tail -n 1)"
 fi
 
-if [ ! -z "${PREV_WORK}" ]; then
+if [[ ! -z $PREV_WORK ]]; then
 	export WORK_DIR="${BASE_DIR}/work/${PREV_WORK}"
 else
 	export WORK_DIR="${BASE_DIR}/work/${IMG_DATE}-${IMG_TIME}"
@@ -93,34 +93,40 @@ export ROOTFS_DIR
 export PREV_ROOTFS_DIR
 export EXPORT_STAGE
 export EXPORT_ROOTFS_DIR
-export COMPRESS_IMAGES
+export IMG_FILENAME
 
 source "${BASE_DIR}/config.sh"
-
-export IMG_NAME
-export IMG_VERSION
-
-export IMG_FILENAME="${IMG_NAME}-${IMG_VERSION}-${IMG_DATE}"
-export IMG_SUFFIX
 
 mkdir -p "${WORK_DIR}"
 log "Begin ${BASE_DIR}"
 
 for i in $(seq 0 ${STAGE_LAST}); do
-	if [ -d "${BASE_DIR}/stage${i}" ]; then
+	if [[ -d "${BASE_DIR}/stage${i}" ]]; then
 		STAGE_NR="${i}"
 		STAGE_DIR="${BASE_DIR}/stage${i}"
 		run_stage
 	fi
 done
 
-if [ "${EXPORT_IMAGES}" = "1" ]; then
+if [[ $EXPORT_IMAGES = 1 ]]; then
+	log "Exporting images"
 	CLEAN=1
-	for EXPORT_STAGE in ${EXPORT_STAGES}; do
-		STAGE_DIR=${BASE_DIR}/export-image
+	for EXPORT_STAGE in ${EXPORT_STAGES[@]}; do
+		STAGE_DIR="${BASE_DIR}/export-image"
 		source "${BASE_DIR}/${EXPORT_STAGE}/EXPORT_IMAGE"
+		IMG_FILENAME="${IMG_NAME}-${IMG_VERSION}-${IMG_DATE}${IMG_SUFFIX}.img"
+		IMG_FILENAMES+=( $IMG_FILENAME )
 		EXPORT_ROOTFS_DIR="${WORK_DIR}/${EXPORT_STAGE}/rootfs"
 		run_stage
+	done
+fi
+
+if [[ $COMPRESS_IMAGES = 1 ]]; then
+	log "Compressing images"
+	for IMG_FILENAME in ${IMG_FILENAMES[@]}; do
+		if [[ -f "${DEPLOY_DIR}/${IMG_FILENAME}" ]]; then
+			xz -v -9 -T0 "${DEPLOY_DIR}/${IMG_FILENAME}"
+		fi
 	done
 fi
 
