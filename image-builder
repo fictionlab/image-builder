@@ -2,7 +2,7 @@
 
 usage()
 {
-	echo "Usage: image-builder [ -f FIRST ] [ -l LAST ] [ -c ] [ -d ] [ -e ] [ -x ] PATH" 1>&2
+	echo "Usage: image-builder [ -f FIRST ] [ -l LAST ] [ -c ] [ -d ] [ -e ] [ -x ] [ -b STAGE ] PATH" 1>&2
 }
 
 exit_abnormal()
@@ -31,8 +31,9 @@ CONTINUE=0
 CLEAN=1
 EXPORT_IMAGES=1
 COMPRESS_IMAGES=0
+EDIT_MODE=0
 
-while getopts ":f:l:cdex" options; do
+while getopts ":f:l:cdexb:" options; do
 	case "${options}" in
 		f)
 			STAGE_FIRST=${OPTARG}
@@ -51,6 +52,11 @@ while getopts ":f:l:cdex" options; do
 			;;
 		x)
 			COMPRESS_IMAGES=1
+			;;
+		b)
+			CONTINUE=1
+			EDIT_MODE=1
+			EDIT_STAGE=${OPTARG}
 			;;
 		:)
 			echo "Error: -${OPTARG} requires an argument."
@@ -79,6 +85,13 @@ if [[ ! -z $PREV_WORK ]]; then
 	export WORK_DIR="${BASE_DIR}/work/${PREV_WORK}"
 else
 	export WORK_DIR="${BASE_DIR}/work/${IMG_DATE}-${IMG_TIME}"
+fi
+
+if [[ $EDIT_MODE = 1 ]]; then
+	ROOTFS_DIR="${WORK_DIR}/stage${EDIT_STAGE}/rootfs"
+	on_chroot
+	unmount "${ROOTFS_DIR}"
+	exit 0
 fi
 
 export DEPLOY_DIR="${BASE_DIR}/deploy"
