@@ -67,6 +67,12 @@ on_chroot() {
 		mount --bind /sys "${ROOTFS_DIR}/sys"
 	fi
 
-	env -i /sbin/capsh --drop=cap_setfcap "--chroot=${ROOTFS_DIR}/" -- -e -l "$@"
+	COMMAND="chroot \"${ROOTFS_DIR}\" /bin/bash -e -l $@"
+
+	if [[ -f ${BASE_DIR}/chroot-env.sh ]]; then
+		env -i bash --noprofile --norc -c "source "${BASE_DIR}/chroot-env.sh" && ${COMMAND}"
+	else
+		env -i bash --noprofile --norc -c "${COMMAND}"
+	fi
 }
 export -f on_chroot
