@@ -11,13 +11,18 @@ exit_abnormal()
 	exit 1
 }
 
+cleanup()
+{
+	unmount "${BASE_DIR}"
+}
+
 if [ "$(id -u)" != "0" ]; then
 	echo "Please run this script as root" 1>&2
 	exit 1
 fi
 
-export IMAGE_BUILDER_DIR="$(dirname $(readlink -f "${BASH_SOURCE[0]}"))"
-export SCRIPT_DIR="${IMAGE_BUILDER_DIR}/scripts"
+IMAGE_BUILDER_DIR="$(dirname $(readlink -f "${BASH_SOURCE[0]}"))"
+SCRIPT_DIR="${IMAGE_BUILDER_DIR}/scripts"
 
 source "${SCRIPT_DIR}/common.sh"
 source "${SCRIPT_DIR}/stages.sh"
@@ -72,6 +77,8 @@ shift $((OPTIND-1))
 
 BASE_DIR="$(cd "$1" && pwd)"
 
+trap cleanup EXIT
+
 dependencies_check "${BASE_DIR}/depends"
 
 export IMG_DATE="$(date +%Y-%m-%d)"
@@ -90,7 +97,6 @@ fi
 if [[ $EDIT_MODE = 1 ]]; then
 	ROOTFS_DIR="${WORK_DIR}/stage${EDIT_STAGE}/rootfs"
 	on_chroot
-	unmount "${ROOTFS_DIR}"
 	exit 0
 fi
 
@@ -106,9 +112,15 @@ export ROOTFS_DIR
 export PREV_ROOTFS_DIR
 export EXPORT_STAGE
 export EXPORT_ROOTFS_DIR
+export IMG_NAME
+export IMG_VERSION
 export IMG_FILENAME
 
-source "${BASE_DIR}/config.sh"
+if [[ -f "${BASE_DIR}/config.sh" ]]; then
+	source "${BASE_DIR}/config.sh"
+fi
+
+IMG_NAME=${IMG_NAME:-image}
 
 mkdir -p "${WORK_DIR}"
 log "Begin ${BASE_DIR}"
