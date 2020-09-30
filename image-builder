@@ -152,7 +152,7 @@ if [[ $COMPRESS_IMAGES = 1 ]]; then
 	log "Compressing images"
 	for IMG_FILENAME in ${IMG_FILENAMES[@]}; do
 		if [[ -f "${DEPLOY_DIR}/${IMG_FILENAME}" ]]; then
-			xz -v -9 -T0 "${DEPLOY_DIR}/${IMG_FILENAME}"
+			xz -vf -9 -T0 "${DEPLOY_DIR}/${IMG_FILENAME}"
 		fi
 	done
 fi
