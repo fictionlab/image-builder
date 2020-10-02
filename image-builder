@@ -51,6 +51,7 @@ while getopts ":f:l:cdexb:" options; do
 			;;
 		d)
 			CLEAN=0
+			CONTINUE=1
 			;;
 		e)
 			EXPORT_IMAGES=0
