@@ -14,12 +14,12 @@ sudo ln -s $(pwd)/image-builder /usr/bin/image-builder
 ```
 image-builder [-cdex] [-f first] [-l last] [-b stage] [path]"
     -c        Continue from the last work directory instead of creating a new one
-    -d        Dirty run. 
-    -f first  
-    -l last   
-    -b stage  
+    -d        Dirty run. Don't clean the stage work directory before starting the stage. Implies -c
+    -f first  Skip the stages preceding the specified one
+    -l last   End on the specified stage
+    -b stage  Only open a chrooted shell inside the root filesystem of the specified stage. Implies -c
     -e        Skip the export-image stages
-    -x        Compress the result images
+    -x        Compress the resulted images
 ```
 
 [pi-gen]: https://github.com/RPi-Distro/pi-gen
