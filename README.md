@@ -27,25 +27,53 @@ image-builder [-cdex] [-f first] [-l last] [-b stage] [path]"
 ## Configuration
 The directory containing the configarion for `image-builder` should have the following structure:
 
-* `depends` - Specifies the dependencies needed to build the image. See the [dependencies_check.sh](./scripts/dependencies_check.sh) file for more info.
-* `config.sh` - 
-* `chroot-env.sh` - 
-* `stageX` - 
+* `depends` - Specifies the dependencies needed to build the image. See the [dependencies_check.sh] file for more info.
+* `config.sh` - Exports environment variables that are used throughout the build.
+* `chroot-env.sh` - Exports environment variables for chrooted bash sessions.
+* `stageX` - A directory containing configuration for stage `X`.
   * `prerun.sh` - A script that is run before any substage.
   * _`substage`_ - A substage directory. Substages are processed in lexicographical order.
-    * `XX-debconf` - 
-    * `XX-packages` -
-    * `XX-packages-nr` - 
-    * `XX-patches` - 
-      * `EDIT` - 
-    * `XX-run.sh` -
-    * `XX-run-chroot.sh` -
+    * `XX-debconf` - A file used to preseed debconf database values (See [debconf-set-selections]). Can use the exported environment variables.
+    * `XX-packages` - A file containing list of packages to install with `apt`. Comments in the file are allowed.
+    * `XX-packages-nr` - The same as `XX-packages` except that `apt` is used with `--no-install-recommends` option.
+    * `XX-patches` - Series of patches to apply using [quilt].
+      * `EDIT` - If this file exists, `image-builder` will start an interactive bash session before applying the patches.
+    * `XX-run.sh` - An executable to run.
+    * `XX-run-chroot.sh` - A list of commands to run on a chrooted bash session.
     * `SKIP` - If this file exists, the substage is skipped.
-  * `EXPORT_IMAGE` -
+  * `EXPORT_IMAGE` - Indicates an image for this stage should be exported. Can export additional environment variables for the `export` stage (e.g. `IMG_SUFFIX`).
   * `SKIP_IMAGES` - If this file exists, EXPORT_IMAGE file is ignored.
   * `SKIP` - If this file exists, the whole stage is skipped.
-* `export-image` -
+* `export-image` - A directory containing configuration for the `export` stage. The structure is the same as for any other stage except that `EXPORT_IMAGE` and `SKIP_IMAGES` file don't have any effect.
 
-## Exported variables
+## Exported environment variables
+common:
+* `IMG_NAME`
+* `IMG_VERSION`
+* `STAGE`
+* `LOG_FILE`
+* `STAGE_DIR`
+* `STAGE_WORK_DIR`
+* `SHARED_WORK_DIR`
+* `PREV_STAGE`
+* `PREV_STAGE_DIR`
+* `ROOTFS_DIR`
+* `PREV_ROOTFS_DIR`
 
+export:
+* `EXPORT_STAGE`
+* `EXPORT_ROOTFS_DIR`
+* `IMG_FILENAME`
+* `DEPLOY_DIR`
+
+functions:
+* `log`
+* `copy_previous`
+* `unmount`
+* `unmount_image`
+* `on_chroot`
+
+[dependencies_check.sh]: ./scripts/dependencies_check.sh
+[debconf-set-selections]: http://manpages.ubuntu.com/manpages/bionic/man1/debconf-set-selections.1.html
 [pi-gen]: https://github.com/RPi-Distro/pi-gen
+[quilt]: https://linux.die.net/man/1/quilt
