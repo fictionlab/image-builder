@@ -22,26 +22,30 @@ image-builder [-cdex] [-f first] [-l last] [-b stage] [path]"
     -x        Compress the resulted images
 ```
 
-`path` should point to a directory configuration for `image-builder`. If no directory is specified, current working directory is assumed. \
-The directory should have the following structure:
+`path` should point to a directory configuration for `image-builder`. If no directory is specified, current working directory is assumed.
 
-* `depends` - Specify dependencies needed to build the image
+## Configuration
+The directory containing the configarion for `image-builder` should have the following structure:
+
+* `depends` - Specifies the dependencies needed to build the image. See the [dependencies_check.sh](./scripts/dependencies_check.sh) file for more info.
 * `config.sh` - 
 * `chroot-env.sh` - 
-* `stage`_`X`_ - 
-  * `prerun.sh` - 
-  * _`substage`_ - 
-    * _`XX`_`-debconf` - 
-    * _`XX`_`-packages` -
-    * _`XX`_`-packages-nr` - 
-    * _`XX`_`-patches` - 
-      * `EDIT`
-    * _`XX`_`-run.sh` -
-    * _`XX`_`-run-chroot.sh` -
-    * `SKIP` - If this file exists, the substage is skipped
+* `stageX` - 
+  * `prerun.sh` - A script that is run before any substage.
+  * _`substage`_ - A substage directory. Substages are processed in lexicographical order.
+    * `XX-debconf` - 
+    * `XX-packages` -
+    * `XX-packages-nr` - 
+    * `XX-patches` - 
+      * `EDIT` - 
+    * `XX-run.sh` -
+    * `XX-run-chroot.sh` -
+    * `SKIP` - If this file exists, the substage is skipped.
   * `EXPORT_IMAGE` -
-  * `SKIP_IMAGES` - If this file exists, EXPORT_IMAGE file is ignored
-  * `SKIP` - If this file exists, the whole stage is skipped
+  * `SKIP_IMAGES` - If this file exists, EXPORT_IMAGE file is ignored.
+  * `SKIP` - If this file exists, the whole stage is skipped.
 * `export-image` -
+
+## Exported variables
 
 [pi-gen]: https://github.com/RPi-Distro/pi-gen
