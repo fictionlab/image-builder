@@ -2,7 +2,7 @@
 
 usage()
 {
-	echo "Usage: image-builder [ -f FIRST ] [ -l LAST ] [ -c ] [ -d ] [ -e ] [ -x ] [ -b STAGE ] PATH" 1>&2
+	echo "Usage: image-builder [-cdex] [-f first] [-l last] [-b stage] [path]" 1>&2
 }
 
 exit_abnormal()

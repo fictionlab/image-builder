@@ -22,4 +22,26 @@ image-builder [-cdex] [-f first] [-l last] [-b stage] [path]"
     -x        Compress the resulted images
 ```
 
+`path` should point to a directory configuration for `image-builder`. If no directory is specified, current working directory is assumed. \
+The directory should have the following structure:
+
+* `depends` - Specify dependencies needed to build the image
+* `config.sh` - 
+* `chroot-env.sh` - 
+* `stage`_`X`_ - 
+  * `prerun.sh` - 
+  * _`substage`_ - 
+    * _`XX`_`-debconf` - 
+    * _`XX`_`-packages` -
+    * _`XX`_`-packages-nr` - 
+    * _`XX`_`-patches` - 
+      * `EDIT`
+    * _`XX`_`-run.sh` -
+    * _`XX`_`-run-chroot.sh` -
+    * `SKIP` - If this file exists, the substage is skipped
+  * `EXPORT_IMAGE` -
+  * `SKIP_IMAGES` - If this file exists, EXPORT_IMAGE file is ignored
+  * `SKIP` - If this file exists, the whole stage is skipped
+* `export-image` -
+
 [pi-gen]: https://github.com/RPi-Distro/pi-gen
