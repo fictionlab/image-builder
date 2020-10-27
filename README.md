@@ -64,12 +64,12 @@ The variables that are usable only by the `export` stage include:
 * `IMG_SUFFIX` - A unique name for the stage that is being exported. Can be set in the `EXPORT_IMAGE` file.
 * `IMG_FILENAME` - The name of the image file the `export` stage should produce. It is generated using `IMG_NAME`, `IMG_VERSION` and `IMG_SUFFIX` variables and the current date.
 
-functions:
-* `log [msg]`
-* `copy_previous`
-* `unmount [path]`
-* `unmount_image [path]`
-* `on_chroot`
+The `image-builder` also exports some bash functions that can be used in the bash scripts:
+* `log [msg]` - Writes `msg` with the current time to `LOG_FILE`.
+* `copy_previous` - Copies `PREV_ROOTFS_DIR` into `ROOTFS_DIR`.
+* `unmount [path]` - Unmount filesystems mounted at `path` or any recursive subdirectory.
+* `unmount_image [img]` - Deletes loop devices for the provided image file and unmounts the filesystems which used these loop devices.
+* `on_chroot [cmd]` - Executes command on the chrooted bash session. If `cmd` is not specified, reads commands from standard input.
 
 [dependencies_check.sh]: ./scripts/dependencies_check.sh
 [debconf-set-selections]: http://manpages.ubuntu.com/manpages/bionic/man1/debconf-set-selections.1.html
