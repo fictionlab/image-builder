@@ -35,7 +35,7 @@ The directory containing the configarion for `image-builder` should have the fol
   * _`substage`_ - A substage directory. Substages are processed in lexicographical order.
     * `XX-debconf` - A file used to preseed debconf database values (See [debconf-set-selections]). Can use the exported environment variables.
     * `XX-packages` - A file containing list of packages to install with `apt`. Comments in the file are allowed.
-    * `XX-packages-nr` - The same as `XX-packages` except that `apt` is used with `--no-install-recommends` option.
+    * `XX-packages-nr` - The same as `XX-packages`, except that `apt` is used with `--no-install-recommends` option.
     * `XX-patches` - Series of patches to apply using [quilt].
       * `EDIT` - If this file exists, `image-builder` will start an interactive bash session before applying the patches.
     * `XX-run.sh` - An executable to run.
@@ -47,30 +47,28 @@ The directory containing the configarion for `image-builder` should have the fol
 * `export-image` - A directory containing configuration for the `export` stage. The structure is the same as for any other stage except that `EXPORT_IMAGE` and `SKIP_IMAGES` file don't have any effect.
 
 ## Exported environment variables
-common:
-* `IMG_NAME`
-* `IMG_VERSION`
-* `STAGE`
-* `LOG_FILE`
-* `STAGE_DIR`
-* `STAGE_WORK_DIR`
-* `SHARED_WORK_DIR`
-* `PREV_STAGE`
-* `PREV_STAGE_DIR`
-* `ROOTFS_DIR`
-* `PREV_ROOTFS_DIR`
+The environment variables exported by `image-builder` that are usable by all stages include:
 
-export:
-* `EXPORT_STAGE`
-* `EXPORT_ROOTFS_DIR`
-* `IMG_FILENAME`
-* `DEPLOY_DIR`
+* `IMG_NAME` - A unique name which identifies this image. Should be set in `config.sh` file.
+* `IMG_VERSION` - A version (or a codename) of the image. Should be set in `config.sh` file.
+* `LOG_FILE` - A path to the file containing build logs.
+* `STAGE_WORK_DIR` - A path the directory where the build artifacts related to the stage are stored.
+* `SHARED_WORK_DIR` - A path to the directory where resources shared between stages can be placed.
+* `ROOTFS_DIR` - A path to the directory containing the root filesystem of the image for the current stage.
+* `PREV_ROOTFS_DIR` - A path to the directory containing the root filesystem of the image for the previos stage.
+
+The variables that are usable only by the `export` stage include:
+* `DEPLOY_DIR` - A path to the directory where the resulted images should be placed.
+* `EXPORT_STAGE` - The stage which is being exported, in `stageX` format.
+* `EXPORT_ROOTFS_DIR` - A path to the directory containing the root filesystem of the image for the exported stage.
+* `IMG_SUFFIX` - A unique name for the stage that is being exported. Can be set in the `EXPORT_IMAGE` file.
+* `IMG_FILENAME` - The name of the image file the `export` stage should produce. It is generated using `IMG_NAME`, `IMG_VERSION` and `IMG_SUFFIX` variables and the current date.
 
 functions:
-* `log`
+* `log [msg]`
 * `copy_previous`
-* `unmount`
-* `unmount_image`
+* `unmount [path]`
+* `unmount_image [path]`
 * `on_chroot`
 
 [dependencies_check.sh]: ./scripts/dependencies_check.sh
