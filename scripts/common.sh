@@ -67,7 +67,11 @@ on_chroot() {
 		mount --bind /sys "${ROOTFS_DIR}/sys"
 	fi
 
-	COMMAND="chroot \"${ROOTFS_DIR}\" /bin/bash -e -l $@"
+	if [[ $1 ]]; then
+		COMMAND="chroot \"${ROOTFS_DIR}\" /bin/bash -e -l -c \"$@\""
+	else
+		COMMAND="chroot \"${ROOTFS_DIR}\" /bin/bash -e -l"
+	fi
 
 	if [[ -f ${BASE_DIR}/chroot-env.sh ]]; then
 		env -i bash --noprofile --norc -c "source "${BASE_DIR}/chroot-env.sh" && ${COMMAND}"

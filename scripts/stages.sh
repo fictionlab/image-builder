@@ -6,11 +6,7 @@ run_sub_stage()
 	for i in {00..99}; do
 		if [[ -f ${i}-debconf ]]; then
 			log "Begin ${SUB_STAGE_DIR}/${i}-debconf"
-			on_chroot << EOF
-debconf-set-selections <<SELEOF
-$(envsubst < "${i}-debconf")
-SELEOF
-EOF
+			envsubst < "${i}-debconf" | on_chroot "debconf-set-selections"
 			log "End ${SUB_STAGE_DIR}/${i}-debconf"
 		fi
 
@@ -18,9 +14,7 @@ EOF
 			log "Begin ${SUB_STAGE_DIR}/${i}-packages-nr"
 			PACKAGES="$(sed -f "${SCRIPT_DIR}/remove-comments.sed" < "${i}-packages-nr")"
 			if [ -n "$PACKAGES" ]; then
-				on_chroot << EOF
-apt-get -o APT::Acquire::Retries=3 install --no-install-recommends -y $PACKAGES
-EOF
+				on_chroot "apt-get -o APT::Acquire::Retries=3 install --no-install-recommends -y $PACKAGES"
 			fi
 			log "End ${SUB_STAGE_DIR}/${i}-packages-nr"
 		fi
@@ -29,9 +23,7 @@ EOF
 			log "Begin ${SUB_STAGE_DIR}/${i}-packages"
 			PACKAGES="$(sed -f "${SCRIPT_DIR}/remove-comments.sed" < "${i}-packages")"
 			if [[ -n $PACKAGES ]]; then
-				on_chroot << EOF
-apt-get -o APT::Acquire::Retries=3 install -y $PACKAGES
-EOF
+				on_chroot "apt-get -o APT::Acquire::Retries=3 install -y $PACKAGES"
 			fi
 			log "End ${SUB_STAGE_DIR}/${i}-packages"
 		fi
