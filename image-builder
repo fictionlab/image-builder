@@ -13,7 +13,7 @@ exit_abnormal()
 
 cleanup()
 {
-	unmount "${BASE_DIR}"
+	unmount "${WORK_DIR}"
 }
 
 if [ "$(id -u)" != "0" ]; then
@@ -62,9 +62,7 @@ while getopts ":f:l:cdexb:" options; do
 		b)
 			CONTINUE=true
 			EDIT_MODE=true
-			STAGE_FIRST=${OPTARG}
-			STAGE_LAST=${OPTARG}
-			CLEAN=false
+			EDIT_STAGE=${OPTARG}
 			;;
 		:)
 			echo "Error: -${OPTARG} requires an argument."
@@ -101,6 +99,14 @@ export SHARED_WORK_DIR="${WORK_DIR}/shared"
 export DEPLOY_DIR="${BASE_DIR}/deploy"
 export LOG_FILE="${WORK_DIR}/build.log"
 
+if [[ $EDIT_MODE = true ]]; then
+	STAGE_WORK_DIR="${WORK_DIR}/stage${EDIT_STAGE}"
+	ROOTFS_DIR="${STAGE_WORK_DIR}/rootfs"
+	mount_stage "${STAGE_WORK_DIR}"
+	on_chroot
+	exit 0
+fi
+
 export STAGE
 export STAGE_DIR
 export STAGE_WORK_DIR
@@ -127,25 +133,21 @@ for i in $(seq 0 ${STAGE_LAST}); do
 	if [[ -d "${BASE_DIR}/stage${i}" ]]; then
 		STAGE_NR="${i}"
 		STAGE_DIR="${BASE_DIR}/stage${i}"
-		run_stage
+		begin_stage
 	fi
 done
 
-if [[ $EDIT_MODE = true ]]; then
-	exit 0
-fi
-
 if [[ $EXPORT_IMAGES = true ]]; then
 	log "Exporting images"
-	CLEAN=1
 	for EXPORT_STAGE in ${EXPORT_STAGES[@]}; do
 		STAGE_DIR="${BASE_DIR}/export-image"
 		source "${BASE_DIR}/${EXPORT_STAGE}/EXPORT_IMAGE"
 		IMG_FILENAME="${IMG_NAME}-${IMG_VERSION}-${IMG_DATE}${IMG_SUFFIX}.img"
 		IMG_FILENAMES+=( $IMG_FILENAME )
-		EXPORT_ROOTFS_DIR="${WORK_DIR}/${EXPORT_STAGE}/rootfs"
+		EXPORT_STAGE_WORK_DIR="${WORK_DIR}/${EXPORT_STAGE}"
+		EXPORT_ROOTFS_DIR="${EXPORT_STAGE_WORK_DIR}/rootfs"
 		PREV_ROOTFS_DIR="${EXPORT_ROOTFS_DIR}"
-		run_stage
+		begin_stage
 	done
 fi
 
