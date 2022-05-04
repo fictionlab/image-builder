@@ -96,6 +96,12 @@ run_stage(){
 		fi
 		mkdir -p "${STAGE_WORK_DIR}"
 		
+		if [[ $STAGE != "export-image" && $STAGE_NR != 0 ]]; then
+			rm -rf "${STAGE_WORK_DIR}/overlay_work" "${STAGE_WORK_DIR}/rootfs"
+			mkdir -p "${STAGE_WORK_DIR}/overlay" "${STAGE_WORK_DIR}/overlay_work" "${STAGE_WORK_DIR}/rootfs"
+			mount -t overlay overlay -o lowerdir="${UNDERLAY}",upperdir="${STAGE_WORK_DIR}/overlay",workdir="${STAGE_WORK_DIR}/overlay_work" "${ROOTFS_DIR}"
+		fi
+
 		if [[ -x prerun.sh ]]; then
 			log "Begin ${STAGE_DIR}/prerun.sh"
 			./prerun.sh
@@ -119,6 +125,14 @@ run_stage(){
 	PREV_STAGE="${STAGE}"
 	PREV_STAGE_DIR="${STAGE_DIR}"
 	PREV_ROOTFS_DIR="${ROOTFS_DIR}"
+
+	if [[ $STAGE != "export-image" ]]; then
+		if [[ $STAGE_NR = 0 ]]; then
+			UNDERLAY="${ROOTFS_DIR}"
+		else 
+			UNDERLAY="${STAGE_WORK_DIR}/overlay:${UNDERLAY}"
+		fi
+	fi
 
 	popd > /dev/null
 	log "End ${STAGE_DIR}"

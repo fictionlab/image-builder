@@ -4,13 +4,7 @@ log (){
 export -f log
 
 copy_previous(){
-	log "Copying root filesystem from previous stage"
-	if [[ ! -d $PREV_ROOTFS_DIR ]]; then
-		log "Previous stage rootfs not found"
-		false
-	fi
-	mkdir -p "${ROOTFS_DIR}"
-	rsync --info=progress2 --no-i-r -h -aHAXx --exclude var/cache/apt/archives "${PREV_ROOTFS_DIR}/" "${ROOTFS_DIR}/"
+	log "copy_previous is deprecated, ignoring.."
 }
 export -f copy_previous
 
