@@ -63,6 +63,8 @@ on_chroot() {
 
 	if [[ $1 ]]; then
 		COMMAND="chroot \"${ROOTFS_DIR}\" /bin/bash -e -l -c \"$@\""
+	elif [[ -t 0 ]]; then 
+		COMMAND="chroot \"${ROOTFS_DIR}\" /bin/bash -l"
 	else
 		COMMAND="chroot \"${ROOTFS_DIR}\" /bin/bash -e -l"
 	fi
