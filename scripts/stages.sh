@@ -91,7 +91,7 @@ run_stage(){
 	if [[ $STAGE = "export-image" ||
 	    $STAGE_NR -ge $STAGE_FIRST && ! -f SKIP ]]; then
 
-		if [[ $CLEAN = 1 && -d $STAGE_WORK_DIR ]]; then
+		if [[ $CLEAN = true && -d $STAGE_WORK_DIR ]]; then
 			rm -rf "${STAGE_WORK_DIR}"
 		fi
 		mkdir -p "${STAGE_WORK_DIR}"
