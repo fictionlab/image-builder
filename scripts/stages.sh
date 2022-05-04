@@ -92,30 +92,36 @@ run_stage(){
 	    $STAGE_NR -ge $STAGE_FIRST && ! -f SKIP ]]; then
 
 		if [[ $CLEAN = true && -d $STAGE_WORK_DIR ]]; then
+			log "Cleaning stage work dir from previous build"
 			rm -rf "${STAGE_WORK_DIR}"
 		fi
 		mkdir -p "${STAGE_WORK_DIR}"
 		
 		if [[ $STAGE != "export-image" && $STAGE_NR != 0 ]]; then
+			log "Mounting overlay for current stage"
 			rm -rf "${STAGE_WORK_DIR}/overlay_work" "${STAGE_WORK_DIR}/rootfs"
 			mkdir -p "${STAGE_WORK_DIR}/overlay" "${STAGE_WORK_DIR}/overlay_work" "${STAGE_WORK_DIR}/rootfs"
 			mount -t overlay overlay -o lowerdir="${UNDERLAY}",upperdir="${STAGE_WORK_DIR}/overlay",workdir="${STAGE_WORK_DIR}/overlay_work" "${ROOTFS_DIR}"
 		fi
 
-		if [[ -x prerun.sh ]]; then
-			log "Begin ${STAGE_DIR}/prerun.sh"
-			./prerun.sh
-			log "End ${STAGE_DIR}/prerun.sh"
-		fi
-		for SUB_STAGE_DIR in "${STAGE_DIR}"/*; do
-			if [[ -d $SUB_STAGE_DIR ]]; then
-				if [[ ! -f ${SUB_STAGE_DIR}/SKIP ]]; then
-					run_sub_stage
-				else
-					log "Skipping ${STAGE}/$(basename ${SUB_STAGE_DIR})"
-				fi
+		if [[ $EDIT_MODE = true ]]; then
+			on_chroot
+		else
+			if [[ -x prerun.sh ]]; then
+				log "Begin ${STAGE_DIR}/prerun.sh"
+				./prerun.sh
+				log "End ${STAGE_DIR}/prerun.sh"
 			fi
-		done
+			for SUB_STAGE_DIR in "${STAGE_DIR}"/*; do
+				if [[ -d $SUB_STAGE_DIR ]]; then
+					if [[ ! -f ${SUB_STAGE_DIR}/SKIP ]]; then
+						run_sub_stage
+					else
+						log "Skipping ${STAGE}/$(basename ${SUB_STAGE_DIR})"
+					fi
+				fi
+			done
+		fi
 	else
 		log "Skipping ${STAGE}"
 	fi
