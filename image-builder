@@ -102,7 +102,9 @@ export LOG_FILE="${WORK_DIR}/build.log"
 if [[ $EDIT_MODE = true ]]; then
 	STAGE_WORK_DIR="${WORK_DIR}/stage${EDIT_STAGE}"
 	ROOTFS_DIR="${STAGE_WORK_DIR}/rootfs"
-	mount_stage "${STAGE_WORK_DIR}"
+	if [[ -d "${STAGE_WORK_DIR}/underlay" ]]; then
+		mount_stage "${STAGE_WORK_DIR}"
+	fi
 	on_chroot
 	exit 0
 fi
