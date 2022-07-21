@@ -119,7 +119,9 @@ begin_stage(){
 		rm -rf "${STAGE_WORK_DIR}"
 		mkdir -p "${STAGE_WORK_DIR}"
 
-		mount_stage "${EXPORT_STAGE_WORK_DIR}"
+		if [[ -f "${EXPORT_STAGE_WORK_DIR}/underlay" ]]; then
+			mount_stage "${EXPORT_STAGE_WORK_DIR}"
+		fi
 
 		run_stage
 
@@ -131,7 +133,7 @@ begin_stage(){
 		fi
 		mkdir -p "${STAGE_WORK_DIR}"
 		
-		if [[ $STAGE_NR != 0 ]]; then
+		if [[ ! -z $UNDERLAY ]]; then
 			printf "%s" "${UNDERLAY}" > "${STAGE_WORK_DIR}/underlay"
 			mount_stage "${STAGE_WORK_DIR}"
 		fi
