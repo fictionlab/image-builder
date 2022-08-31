@@ -123,7 +123,9 @@ export IMG_VERSION
 export IMG_FILENAME
 
 if [[ -f "${BASE_DIR}/config.sh" ]]; then
+	pushd "${BASE_DIR}"
 	source "${BASE_DIR}/config.sh"
+	popd
 fi
 
 IMG_NAME=${IMG_NAME:-image}
